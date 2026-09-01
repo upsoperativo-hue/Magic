@@ -27,7 +27,7 @@ if uploaded_files:
 
         # 1) Estrazione tracking da tutti i file
         for file in uploaded_files:
-            df = pd.read_excel(file)
+            df = pd.read_excel(file, header=5)
 
             if "WeekendEligibleVolume" not in df.columns or "TrackingNumber" not in df.columns:
                 st.error(f"File {file.name}: colonne 'WeekendEligibleVolume' o 'TrackingNumber' mancanti.")
