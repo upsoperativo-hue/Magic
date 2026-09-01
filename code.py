@@ -5,7 +5,7 @@ from datetime import datetime
 from openpyxl import load_workbook
 
 # CONFIG
-TEMPLATE_PATH = "TOOL_template.xlsx"   # Template Excel nel repository
+TEMPLATE_PATH = "TOOL_template.xlsm"   # Template Excel nel repository
 SHEET_NAME = "Trackingnummern"
 START_ROW = 7
 COLUMN = "A"
