@@ -81,7 +81,7 @@ if uploaded_files:
         buffer.seek(0)
 
         today_str = datetime.now().strftime("%d.%m.%Y")
-        filename = f"TOOL ELEGGIBILI {today_str}.xlsx"
+        filename = f"TOOL ELEGGIBILI {today_str}.xlsm"
 
         st.download_button(
             "Scarica TOOL ELEGGIBILI",
