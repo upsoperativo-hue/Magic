@@ -29,12 +29,13 @@ uploaded_files = st.file_uploader(
 if uploaded_files:
     if st.button("Elabora e genera TOOL ELEGGIBILI"):
         all_tracks = []
+        all_colH_values = []   # <-- NUOVO: valori colonna H
 
-        # 1) Estrazione tracking da tutti i file
+        # 1) Estrazione tracking + colonna H da tutti i file
         for file in uploaded_files:
-            # Riga 6 come intestazione (header=5 perché zero-based)
-            df = pd.read_excel(file, header=5)
+            df = pd.read_excel(file, header=5)  # riga 6 come intestazione
 
+            # Controllo colonne tracking
             missing = []
             if "WeekendEligibleVolume" not in df.columns:
                 missing.append("WeekendEligibleVolume")
@@ -47,9 +48,17 @@ if uploaded_files:
                 )
                 continue
 
+            # --- Tracking eleggibili ---
             df_filtered = df[df["WeekendEligibleVolume"] == 1]
             tracks = df_filtered["TrackingNumber"].dropna().astype(str).tolist()
             all_tracks.extend(tracks)
+
+            # --- Colonna H (valori generici) ---
+            if len(df.columns) >= 8:
+                col_H = df.iloc[6:, 7]  # colonna H dalla riga 7
+                for val in col_H:
+                    if pd.notna(val):
+                        all_colH_values.append(str(val))
 
         # Rimuovi duplicati mantenendo l'ordine
         seen = set()
@@ -64,6 +73,7 @@ if uploaded_files:
             st.stop()
 
         st.success(f"Trovati {len(unique_tracks)} tracking eleggibili.")
+        st.success(f"Trovati {len(all_colH_values)} valori nella colonna H.")
 
         # 2) Carica il TEMPLATE XLSM con macro
         try:
@@ -94,14 +104,32 @@ if uploaded_files:
         wb.save(final_buffer)
         final_buffer.seek(0)
 
-        # 6) Nome file
+        # 6) Nome file XLSM
         today_str = datetime.now().strftime("%d.%m.%Y")
-        filename = f"TOOL ELEGGIBILI {today_str}.xlsm"
+        filename_xlsm = f"TOOL ELEGGIBILI {today_str}.xlsm"
 
-        # 7) Download
+        # 7) Download XLSM
         st.download_button(
             "Scarica TOOL ELEGGIBILI",
             data=final_buffer.getvalue(),
-            file_name=filename,
+            file_name=filename_xlsm,
             mime="application/vnd.ms-excel.sheet.macroEnabled.12"
+        )
+
+        # ---------------------------------------------------------
+        # 8) GENERAZIONE FILE TXT CON I VALORI DELLA COLONNA H
+        # ---------------------------------------------------------
+
+        txt_buffer = BytesIO()
+        txt_content = "\n".join(all_colH_values)
+        txt_buffer.write(txt_content.encode("utf-8"))
+        txt_buffer.seek(0)
+
+        filename_txt = f"COLONNA_H_{today_str}.txt"
+
+        st.download_button(
+            "Scarica TXT – Colonna H",
+            data=txt_buffer.getvalue(),
+            file_name=filename_txt,
+            mime="text/plain"
         )
